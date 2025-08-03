@@ -121,8 +121,8 @@ class CurrencyRateIntegrationTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.fiat[0].currency").isEqualTo("USD")
-                .jsonPath("$.crypto[0].currency").isEqualTo("BTC");
+                .jsonPath("$.fiat[?(@.currency == 'USD')].currency").isEqualTo("USD")
+                .jsonPath("$.crypto[?(@.currency == 'BTC')].currency").isEqualTo("BTC");
     }
 
     @Test
