@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  currency-db:
+    image: postgres:15
+    container_name: currency-db
+    environment:
+      POSTGRES_DB: currency
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  flyway:
+    image: flyway/flyway:11.8.1
+    depends_on:
+      - currency-db
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql
+    command: -url=jdbc:postgresql://currency-db:5432/currency -user=user -password=password migrate
+    restart: on-failure
+
+  currency-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: currency-app
+    depends_on:
+      flyway:
+        condition: service_completed_successfully
+    environment:
+      SPRING_R2DBC_URL: r2dbc:postgresql://currency-db:5432/currency
+      SPRING_R2DBC_USERNAME: user
+      SPRING_R2DBC_PASSWORD: password
+      SPRING_FLYWAY_URL: jdbc:postgresql://currency-db:5432/currency
+      SPRING_FLYWAY_USER: user
+      SPRING_FLYWAY_PASSWORD: password
+      EXTERNAL_API_BASE_URL: http://mock-api:8080
+    ports:
+      - "8080:8080"
+
+  mock-api:
+    image: docker.io/illenko/currencies-mocks:latest
+    container_name: mock-api
+    ports:
+      - "8081:8080"
