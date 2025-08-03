@@ -113,7 +113,7 @@ class CurrencyRateIntegrationTest {
     }
 
     @Test
-    void fullIntegration_shouldStoreAndReturnRates() {
+    void whenBothExternalApisRespondSuccessfullyAndDbEmpty_shouldStoreAndReturnRates() {
         stubForGetFiatRates();
         stubForGetCryptoRates();
         webTestClient.get()
